@@ -1,0 +1,46 @@
+#! /usr/bin/env ruby
+
+require 'pg'
+
+
+
+#available_commands = [ "clear", "list"] 
+
+
+
+def display_help
+  help_content = <<-HEREDOC
+  An expense recording system
+
+  Commands:
+  
+  add AMOUNT MEMO [DATE] - record a new expense
+  clear - delete all expenses
+  list - list all expenses
+  delete NUMBER - remove expense with id NUMBER
+  search QUERY - list expenses with a matching memo field
+
+  HEREDOC
+
+  puts(help_content)
+end
+
+def display_list
+  connection = PG.connect(dbname: "expense_db")
+  result = connection.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
+
+  result.each do |tuple|
+    columns = [ tuple["id"].rjust(3),
+                tuple["created_on"].rjust(10),
+                tuple["amount"].rjust(12),
+                tuple["memo"]]
+    puts columns.join(" | ")
+  end
+end
+
+
+if ARGV.size == 0
+  display_help
+elsif ARGV.size == 1
+  display_list
+end
