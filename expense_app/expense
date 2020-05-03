@@ -4,12 +4,8 @@ require 'pg'
 
 
 
-#available_commands = [ "clear", "list"] 
-
-
-
 def display_help
-  help_content = <<-HEREDOC
+  help_content = <<~HEREDOC
   An expense recording system
 
   Commands:
@@ -25,7 +21,7 @@ def display_help
   puts(help_content)
 end
 
-def display_list
+def list_expenses
   connection = PG.connect(dbname: "expense_db")
   result = connection.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
 
@@ -39,8 +35,10 @@ def display_list
 end
 
 
-if ARGV.size == 0
+command_arg = ARGV.first
+
+if command_arg == "list"
+  list_expenses
+else 
   display_help
-elsif ARGV.size == 1
-  display_list
 end
