@@ -2,7 +2,7 @@
 
 require 'pg'
 
-
+CONNECTION = PG.connect(dbname: "expense_db")
 
 def display_help
   help_content = <<~HEREDOC
@@ -22,8 +22,7 @@ def display_help
 end
 
 def list_expenses
-  connection = PG.connect(dbname: "expense_db")
-  result = connection.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
+  result = CONNECTION.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
 
   result.each do |tuple|
     columns = [ tuple["id"].rjust(3),
@@ -34,11 +33,24 @@ def list_expenses
   end
 end
 
+def add_expense(amount, memo)
+  sql = "INSERT INTO expenses (amount, memo) VALUES ($1, $2);"
+  CONNECTION.exec_params(sql, [amount, memo])
+end
+
+
 
 command_arg = ARGV.first
 
 if command_arg == "list"
   list_expenses
+elsif command_arg == "add"
+  amount = ARGV[1]
+  memo = ARGV[2]
+  abort("You must provide an amount and memo") unless amount && memo
+  add_expense(amount, memo)
 else 
   display_help
 end
+
+
