@@ -1,6 +1,7 @@
 #! /usr/bin/env ruby
 
 require 'pg'
+require 'io/console'  # for using STDIN#getch
 
 
 class ExpenseData
@@ -42,14 +43,13 @@ class ExpenseData
   end
 
   def delete_all_expenses
-    abort unless confirm_clear_expenses == 'y'
     sql = "DELETE FROM expenses;"
     connection.exec(sql)
     puts "All expenses have been deleted."
   end 
 
 
-  #private
+  private
 
   attr_accessor :connection
 
@@ -61,12 +61,6 @@ class ExpenseData
                   tuple["memo"]]
       puts columns.join(" | ")
     end
-  end
-
-  def confirm_clear_expenses
-    puts "This will remove all expenses. Are you sure? (y/n)"
-    response = gets.chomp
-    return 'y' if /^(y|Y)/.match?(response)
   end
 end
 
@@ -98,6 +92,7 @@ class CLI
       abort("Nothing has been deleted. You must provide an id of expense for deletion") unless id
       application.delete_expense(id)
     when "clear"
+      abort unless /^(y|Y)/.match?(reconfirm_delete_all_expenses)
       application.delete_all_expenses
     else
       display_help
@@ -125,6 +120,11 @@ class CLI
   private
 
   attr_accessor :application
+
+  def reconfirm_delete_all_expenses
+    puts "This will remove all expenses. Are you sure? (y/n)"
+    response = STDIN.getch
+  end
 
 end
 
