@@ -26,7 +26,19 @@ class ExpenseData
     display_expenses(result)
   end
 
-  private
+  def delete_expense(id)
+    sql = "SELECT * FROM expenses WHERE id = $1"
+    result = connection.exec_params(sql, [id])
+
+    puts 'The following expense has been deleted:'
+    display_expenses(result)
+    
+    sql = "DELETE FROM expenses WHERE id = $1"
+    delete_result = connection.exec_params(sql, [id])
+    
+  end
+
+  #private
 
   attr_accessor :connection
 
@@ -64,6 +76,11 @@ class CLI
       query = arguments[0]
       abort("You must provide a search query") unless query
       application.search_expenses(query)
+    when "delete"
+      id = arguments[0]
+      abort("Nothing has been deleted. You must provide an id of expense for deletion") unless id
+      abort("There is no expense with the id '#{id}'") unless valid_epxense_id?(id)
+      application.delete_expense(id)
     else
       display_help
     end
@@ -86,9 +103,15 @@ class CLI
     puts(help_content)
   end
 
-  private
+  #protected
 
   attr_accessor :application
+
+  def valid_epxense_id?(id)
+    sql = "SELECT id FROM expenses;"
+    existing_ids = application.connection.exec(sql).field_values('id')
+    existing_ids.include?(id.to_s)
+  end
 end
 
 
