@@ -39,8 +39,15 @@ class ExpenseData
     else
       puts "There is no expense with the id '#{id}'"
     end
-    
   end
+
+  def delete_all_expenses
+    abort unless confirm_clear_expenses == 'y'
+    sql = "DELETE FROM expenses;"
+    connection.exec(sql)
+    puts "All expenses have been deleted."
+  end 
+
 
   #private
 
@@ -54,6 +61,12 @@ class ExpenseData
                   tuple["memo"]]
       puts columns.join(" | ")
     end
+  end
+
+  def confirm_clear_expenses
+    puts "This will remove all expenses. Are you sure? (y/n)"
+    response = gets.chomp
+    return 'y' if /^(y|Y)/.match?(response)
   end
 end
 
@@ -84,6 +97,8 @@ class CLI
       id = arguments[0]
       abort("Nothing has been deleted. You must provide an id of expense for deletion") unless id
       application.delete_expense(id)
+    when "clear"
+      application.delete_all_expenses
     else
       display_help
     end
@@ -105,6 +120,7 @@ class CLI
 
     puts(help_content)
   end
+
 
   private
 
