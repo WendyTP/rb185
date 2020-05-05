@@ -8,6 +8,27 @@ class ExpenseData
   
   def initialize
     @connection = PG.connect(dbname: "expense_db")
+    setup_schema
+  end
+
+  def setup_schema
+    sql = <<~SQL
+      SELECT count(*) FROM information_schema.tables 
+      WHERE table_schema = 'public' AND table_name = 'expenses';
+      SQL
+      
+    count_result = connection.exec(sql).field_values('count')[0].to_i
+    if count_result == 0 
+      connection.exec ( <<~SQL
+        CREATE TABLE expenses (
+          id serial PRIMARY KEY,
+          amount numeric(6,2) NOT NULL CHECK (amount >= 0.01),
+          memo text NOT NULL,
+          created_on date DEFAULT now() NOT NULL
+        );
+      SQL
+      )
+    end
   end
 
   def list_expenses
@@ -49,7 +70,7 @@ class ExpenseData
     sql = "DELETE FROM expenses;"
     connection.exec(sql)
     puts "All expenses have been deleted."
-  end 
+  end
 
 
   private

@@ -14,7 +14,8 @@ ALTER COLUMN created_on SET NOT NULL;
 ALTER TABLE expenses
 ADD CHECK (amount >= 0.01);
 
-INSERT INTO expenses (amount, memo) 
-VALUES (14.56, 'Pencils'),
-       (3.29, 'Coffee'),
-       (49.99, 'Text Editor');
+
+---INSERT INTO expenses (amount, memo) 
+---VALUES (14.56, 'Pencils'),
+---       (3.29, 'Coffee'),
+---       (49.99, 'Text Editor');
